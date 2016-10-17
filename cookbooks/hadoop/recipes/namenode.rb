@@ -2,6 +2,7 @@ include_recipe 'hadoop::hdfs'
 
 # Create the directory /var/hadoop/name
 directory '/var/hadoop/name' do
+	owner node[:hadoop][:hdfs_user]
 	group node[:hadoop][:hadoop_group]
 	mode '0770'
 	recursive true
@@ -29,4 +30,5 @@ template '/etc/hadoop/hdfs-site.xml' do
 end
 
 # Format the namenode
-execute 'su - '+node[:hadoop][:hdfs_user]+' -c "/opt/hadoop-'+node[:hadoop][:version]+'/bin/hdfs namenode -format cluster"'
+# This is commented out because 1. we don't want it running every time, and 2. on reformat it prompts for a response and hangs the run.
+#execute "su - #{node[:hadoop][:hdfs_user]} -c \"/opt/hadoop-#{node[:hadoop][:version]}/bin/hdfs namenode -format cluster\""

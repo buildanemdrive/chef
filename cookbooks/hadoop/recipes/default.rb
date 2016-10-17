@@ -6,8 +6,18 @@
 
 execute 'apt-get update'
 
+# Apparently this was not needed in Ubuntu because I had a private-public key pair for those servers. Consider revising this?
+package 'ssh-askpass' do
+	action :install
+end
+
 package 'openjdk-7-jdk' do
-	version '7u51-2.4.6-1ubuntu4'
+	case node[:platform]
+	when 'ubuntu'
+		version '7u51-2.4.6-1ubuntu4'
+	when 'raspbian'
+		version '7u101-2.6.6-2~deb8u1+rpi1'
+	end
 	action :install
 end
 
@@ -24,7 +34,9 @@ cookbook_file 'hadoop-'+node[:hadoop][:version]+'.tar.gz' do
 	group node[:hadoop][:hadoop_group]
 	mode 770
 end
-execute 'tar -xf /opt/hadoop-'+node[:hadoop][:version]+'.tar.gz -C /opt'
+execute 'tar -xf /opt/hadoop-'+node[:hadoop][:version]+'.tar.gz -C /opt' do
+	not_if { File.exist?("/opt/hadoop-" + node[:hadoop][:version]) }
+end
 execute 'chown -R root:'+node[:hadoop][:hadoop_group]+' /opt/hadoop-'+node[:hadoop][:version]
 
 # Etc
@@ -36,6 +48,21 @@ execute 'rm -Rf /opt/hadoop-'+node[:hadoop][:version]+'/etc/hadoop' do
 end
 execute 'ln -s /etc/hadoop /opt/hadoop-'+node[:hadoop][:version]+'/etc/hadoop' do
 	not_if { ::File.exist?('/opt/hadoop'+node['hadoop']['version']+'/etc/hadoop') }
+end
+
+java_home=''
+case node[:platform]
+when 'ubuntu'
+	java_home = '/usr/lib/jvm/java-7-openjdk-amd64'
+when 'raspbian'
+	java_home = '/usr/lib/jvm/java-7-openjdk-armhf'
+end
+template '/etc/hadoop/hadoop-env.sh' do
+	group node[:hadoop][:hadoop_group]
+	mode '0770'
+	variables({
+		:java_home => java_home
+	})
 end
 
 # Logs

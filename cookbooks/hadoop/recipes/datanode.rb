@@ -2,6 +2,7 @@ include_recipe 'hadoop::hdfs'
 
 # Create the directory /var/hadoop/data
 directory '/var/hadoop/data' do
+	owner node[:hadoop][:hdfs_user]
 	group node[:hadoop][:hadoop_group]
 	mode '0770'
 	recursive true

@@ -1,0 +1,15 @@
+#. /etc/rc.d/init.d/functions
+
+case "$1" in
+        start)
+                su - <%= @yarn_user %> -c "/opt/hadoop-<%= @hadoop_version %>/sbin/yarn-daemons.sh --config /etc/hadoop start resourcemanager"
+                RETVAL=$?
+                ;;
+        stop)
+                su - <%= @yarn_user %> -c "/opt/hadoop-<%= @hadoop_version %>/sbin/yarn-daemons.sh --config /etc/hadoop stop resourcemanager"
+                RETVAL=$?
+                ;;
+        *)
+                echo "Unsupported command"
+                RETVAL=2
+esac

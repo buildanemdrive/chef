@@ -1,5 +1,7 @@
 .vagrant
 #/cookbooks
+cookbooks/poise
+cookbooks/ssh_keygen
 
 # Bundler
 bin/*
