@@ -7,3 +7,4 @@ long_description 'Installs/Configures hadoop'
 version '0.1.0'
 
 depends 'ssh_keygen'
+depends 'hostname'
