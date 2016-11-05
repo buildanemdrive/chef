@@ -33,6 +33,7 @@ cookbook_file 'hadoop-'+node[:hadoop][:version]+'.tar.gz' do
 	path '/opt/hadoop-'+node[:hadoop][:version]+'.tar.gz'
 	group node[:hadoop][:hadoop_group]
 	mode 770
+	not_if { File.exist?("/opt/hadoop-#{node[:hadoop][:version]}") }
 end
 execute 'tar -xf /opt/hadoop-'+node[:hadoop][:version]+'.tar.gz -C /opt' do
 	not_if { File.exist?("/opt/hadoop-" + node[:hadoop][:version]) }

@@ -2,6 +2,8 @@
 #/cookbooks
 cookbooks/poise
 cookbooks/ssh_keygen
+cookbooks/hostname
+cookbooks/hostsfile
 
 # Bundler
 bin/*
