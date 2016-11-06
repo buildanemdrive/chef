@@ -28,9 +28,8 @@ group node[:hadoop][:hadoop_group] do
 end
 
 # Establish the installation directory
-cookbook_file 'hadoop-'+node[:hadoop][:version]+'.tar.gz' do
-	source 'hadoop-'+node[:hadoop][:version]+'.tar.gz'
-	path '/opt/hadoop-'+node[:hadoop][:version]+'.tar.gz'
+remote_file "/opt/hadoop-#{node[:hadoop][:version]}.tar.gz" do
+	source "http://apache.mirrors.lucidnetworks.net/hadoop/common/hadoop-#{node[:hadoop][:version]}/hadoop-#{node[:hadoop][:version]}.tar.gz"
 	group node[:hadoop][:hadoop_group]
 	mode 770
 	not_if { File.exist?("/opt/hadoop-#{node[:hadoop][:version]}") }
