@@ -8,26 +8,9 @@ directory '/var/hadoop/data' do
 	recursive true
 end
 
-# Install the auto-start script
-template '/etc/init.d/hadoop_datanode' do
-	source 'hadoop_datanode.erb'
-	mode '0755'
-	variables({
-		:hdfs_user => node[:hadoop][:hdfs_user],
-		:hadoop_version => node[:hadoop][:version]
-	})
-end
-execute 'ln -s ../init.d/hadoop_datanode /etc/rc3.d/S99hadoop_datanode' do
-	not_if { ::File.exist?('/etc/rc3.d/S99hadoop_datanode') }
-end
-
-# Install the configuration file.
-template '/etc/hadoop/core-site.xml' do
-	source 'core-site.xml.erb'
-	mode '0644'
-	owner node[:hadoop][:hdfs_user]
-	group node[:hadoop][:hadoop_group]
-	variables({
-		:namenode => node[:hadoop][:namenode]
-	})
+systemd_unit 'hadoop_datanode.service' do
+	enabled true
+	active true
+	content "[Unit]\nDescription=Hadoop Data Node\nBefore=runlevel3.target\nAfter=ssh.service\n\n[Install]\nAlias=hadoop_datanode\nWantedBy=runlevel3.target\n\n[Service]\nType=oneshot\nExecStart=/opt/hadoop-#{node[:hadoop][:version]}/sbin/hadoop-daemons.sh --config /etc/hadoop --script hdfs start datanode\nExecStop=/opt/hadoop-#{node[:hadoop][:version]}/sbin/hadoop-daemons.sh --config /etc/hadoop --script hdfs stop datanode\nUser=#{node[:hadoop][:hdfs_user]}\nRemainAfterExit=true\n"
+	action :create
 end

@@ -32,10 +32,10 @@ ssh_keygen "/home/#{node[:hadoop][:yarn_user]}/.ssh/id_rsa" do
 	secure_directory true
 end
 
-file "/home/#{node[:hadoop][:yarn_user]}/.ssh/authorized_keys" do
+remote_file "/home/#{node[:hadoop][:yarn_user]}/.ssh/authorized_keys" do
 	owner node[:hadoop][:yarn_user]
 	group node[:hadoop][:hadoop_group]
 	mode '0755'
-	content IO.read("/home/#{node[:hadoop][:yarn_user]}/.ssh/id_rsa.pub")
+	source "file:///home/#{node[:hadoop][:yarn_user]}/.ssh/id_rsa.pub"
 	action :create_if_missing
 end

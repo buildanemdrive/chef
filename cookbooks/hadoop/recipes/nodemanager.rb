@@ -1,14 +1,18 @@
 include_recipe 'hadoop::yarn'
 
-# Install the auto-start script
-template '/etc/init.d/hadoop_nodemanager' do
-	source 'hadoop_nodemanager.erb'
-	mode '0755'
+template '/etc/hadoop/yarn-site.xml' do
+	source 'yarn-site.xml.erb'
+	mode '0644'
+	owner node[:hadoop][:yarn_user]
+	group node[:hadoop][:hadoop_group]
 	variables({
-		:yarn_user => node[:hadoop][:yarn_user],
-		:hadoop_version => node[:hadoop][:version]
+		:resourcemanager => node[:hadoop][:resourcemanager]
 	})
 end
-execute 'ln -s ../init.d/hadoop_nodemanager /etc/rc3.d/S99hadoop_nodemanager' do
-	not_if { ::File.exist?('/etc/rc3.d/S99hadoop_nodemanager') }
+
+systemd_unit 'hadoop_nodemanager.service' do
+	enabled true
+	active true
+	content "[Unit]\nDescription=Hadoop Node Manager\nBefore=runlevel3.target\nAfter=ssh.service\n\n[Install]\nAlias=yarn_nodemanager\nWantedBy=runlevel3.target\n\n[Service]\nType=oneshot\nExecStart=/opt/hadoop-#{node[:hadoop][:version]}/sbin/yarn-daemons.sh --config /etc/hadoop start nodemanager\nExecStop=/opt/hadoop-#{node[:hadoop][:version]}/sbin/yarn-daemons.sh --config /etc/hadoop stop nodemanager\nUser=#{node[:hadoop][:yarn_user]}\nRemainAfterExit=true\n"
+	action :create
 end

@@ -4,7 +4,12 @@
 #
 # Copyright (c) 2016 The Authors, All Rights Reserved.
 
-execute 'apt-get update'
+include_recipe 'hostname::default'
+
+apt_update 'Update the apt cache daily' do
+	frequency 86_400
+	action :periodic
+end
 
 # Apparently this was not needed in Ubuntu because I had a private-public key pair for those servers. Consider revising this?
 package 'ssh-askpass' do
@@ -45,9 +50,10 @@ execute 'mv /opt/hadoop-'+node[:hadoop][:version]+'/etc/hadoop /etc' do
 end
 execute 'rm -Rf /opt/hadoop-'+node[:hadoop][:version]+'/etc/hadoop' do
 	only_if { ::File.exist?('/opt/hadoop-'+node[:hadoop][:version]+'/etc/hadoop') }
+	action :nothing
 end
 execute 'ln -s /etc/hadoop /opt/hadoop-'+node[:hadoop][:version]+'/etc/hadoop' do
-	not_if { ::File.exist?('/opt/hadoop'+node['hadoop']['version']+'/etc/hadoop') }
+	not_if { ::File.symlink?("/opt/hadoop-#{node['hadoop']['version']}/etc/hadoop") }
 end
 
 java_home=''
@@ -66,7 +72,7 @@ template '/etc/hadoop/hadoop-env.sh' do
 end
 
 # Logs
-directory '/var/log/hadoop' do
+directory node[:hadoop][:log_dir] do
 	owner 'root'
 	group node[:hadoop][:hadoop_group]
 	mode '0770'

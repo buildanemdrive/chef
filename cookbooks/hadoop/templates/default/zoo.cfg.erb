@@ -13,8 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # the directory where the snapshot is stored.
-dataDir=/tmp/zookeeper
+dataDir=/var/hadoop/zookeeper
 # the port at which the clients will connect
 clientPort=2181
 # disable the per-ip limit on the number of connections since this is a non-production config
 maxClientCnxns=0
+tickTime=2000
+initLimit=5
+syncLimit=2
+server.1=192.168.0.68:2888:3888
+server.2=192.168.0.12:2888:3888
